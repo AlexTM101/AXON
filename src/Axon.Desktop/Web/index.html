@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'">
+  <title>AXON · Codex Observatory</title>
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="graph.js"></script>
+  <script defer src="scene-geometry.js"></script>
+  <script defer src="scene.js"></script>
+  <script defer src="app.js"></script>
+</head>
+<body>
+  <header class="titlebar" id="titlebar">
+    <div class="brand"><img src="assets/axon-mark.svg" alt=""><span>AXON</span></div>
+    <span class="wordmark">Локальная обсерватория Codex</span>
+    <span id="previewBadge" class="preview-badge" hidden>Предпросмотр · тестовые данные</span>
+    <div class="titlebar-space" id="dragArea" aria-hidden="true"></div>
+    <div class="window-controls"><button id="minimize" title="Свернуть" aria-label="Свернуть">─</button><button id="maximize" title="Развернуть / восстановить" aria-label="Развернуть или восстановить">□</button><button id="close" class="close-window" title="Закрыть" aria-label="Закрыть">×</button></div>
+  </header>
+  <div class="app-shell">
+    <nav class="sidebar" id="sidebar" aria-label="Рабочее пространство">
+      <div class="sidebar-top"><button id="sidebarToggle" class="icon-button" aria-controls="sidebar" aria-expanded="true" aria-label="Скрыть рабочее пространство" title="Скрыть рабочее пространство">‹</button></div>
+      <h2>Наблюдение</h2>
+      <button class="nav-item active" id="navMap" aria-label="Живая карта" title="Живая карта"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M4.5 8.5 9 11m6 2 4.5 2.5M8.5 4.5 11 9m2 6 2.5 4.5"/><circle cx="4" cy="8" r="1.5"/><circle cx="8" cy="4" r="1.5"/><circle cx="20" cy="16" r="1.5"/><circle cx="16" cy="20" r="1.5"/></svg><span class="nav-label">Живая карта</span></button>
+      <button class="nav-item" id="navEvents" aria-label="События" title="События"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h12M8 12h12M8 18h8M4 5v2m0 4v2m0 4v2"/></svg><span class="nav-label">События</span></button>
+      <button class="nav-item" id="settingsOpen" aria-label="Подключение" title="Подключение"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3v5m8-5v5M6 8h12v3a6 6 0 0 1-12 0V8Zm6 9v4"/></svg><span class="nav-label">Подключение</span></button>
+      <div class="section-heading"><span>Недавние чаты</span><span id="sessionsCount" class="tiny-count">0</span></div>
+      <label class="search"><span aria-hidden="true">⌕</span><input id="search" type="search" placeholder="Найти чат" aria-label="Поиск чатов" autocomplete="off"></label>
+      <div class="session-list" id="sessions" aria-label="Чаты"></div>
+      <div class="source-card"><div class="source-heading"><span id="sourceDot" class="dot"></span><span id="sourceLabel">Подключение</span></div><p id="sourceDetail">Читаем локальную историю</p><div class="local-note">Только на этом компьютере</div></div>
+    </nav>
+    <main class="workspace">
+      <header class="workspace-heading"><div class="heading-copy"><span id="workspaceTitle" class="workspace-mode">Живая карта</span><h1 id="sessionTitle">Читаем историю Codex</h1></div><div class="workspace-actions"><div class="observation"><span class="dot cyan"></span>Локальное наблюдение</div><label class="switch-label"><input id="followLatest" type="checkbox"><span class="switch" aria-hidden="true"></span><span>Следовать за новым чатом</span></label><button id="inspectorToggle" class="text-button inspector-toggle" aria-controls="inspector" aria-expanded="true" aria-label="Скрыть панель агента">Агент ‹</button></div></header>
+      <section class="graph-panel" aria-label="Карта агентов">
+        <div class="panel-top"><span class="scene-count">Агенты <span id="agentCount" class="tiny-count">0</span></span><div class="view-tabs" role="group" aria-label="Представление агентов"><button id="mapView" class="selected" aria-pressed="true">Карта</button><button id="listView" aria-pressed="false">Список</button></div></div>
+        <div class="map-viewport" id="mapViewport" tabindex="0" aria-label="Карта. Перетаскивайте для перемещения; плюс и минус — масштаб, Home — показать всё. Агенты доступны клавишей Tab.">
+          <canvas id="canvas" aria-hidden="true"></canvas><div class="map-world" id="mapWorld"></div>
+          <div class="map-empty" id="mapEmpty"><div class="empty-orbit" aria-hidden="true"><span></span></div><h2 id="emptyTitle">Подключаем локальную историю</h2><p id="emptyText">Агенты появятся после чтения доступных чатов Codex.</p><button id="emptyAction" class="secondary-button">Настроить подключение</button></div>
+          <div class="map-corner" id="mapHint">Связи подтверждены событиями</div>
+        </div>
+        <div class="agent-list-view" id="agentListView" hidden></div>
+        <div class="map-bottom"><div class="legend"><span><i class="legend-root"></i>главный агент</span><span><i class="legend-agent"></i>субагент</span><span class="legend-event"><i></i>событие</span></div><div class="camera-controls"><button id="fit" title="Показать всю карту (Home)" aria-label="Показать всю карту">⛶</button><span id="zoomLabel" class="mono">100%</span><button id="zoomOut" title="Уменьшить масштаб" aria-label="Уменьшить масштаб">−</button><button id="zoomIn" title="Увеличить масштаб" aria-label="Увеличить масштаб">+</button></div></div>
+      </section>
+      <section class="activity-panel" aria-label="События, агенты и план">
+        <div class="activity-top"><div class="activity-tabs" role="tablist" aria-label="История чата"><button id="eventsTab" role="tab" aria-selected="true" aria-controls="eventsPane">События <span id="eventCount">0</span></button><button id="rosterTab" role="tab" aria-selected="false" aria-controls="rosterPane">Агенты</button><button id="planTab" role="tab" aria-selected="false" aria-controls="planPane">Явный план</button></div><span class="activity-caption" id="activityCaption">Локальная история</span><button id="activityToggle" class="icon-button" aria-controls="activityContents" aria-expanded="true" aria-label="Свернуть ленту событий" title="Свернуть или развернуть ленту событий">⌄</button></div>
+        <div id="activityContents"><div id="eventsPane" class="activity-content" role="tabpanel" aria-labelledby="eventsTab"></div><div id="rosterPane" class="activity-content" role="tabpanel" aria-labelledby="rosterTab" hidden></div><div id="planPane" class="activity-content" role="tabpanel" aria-labelledby="planTab" hidden></div></div>
+      </section>
+    </main>
+    <aside class="inspector" id="inspector" aria-label="Выбранный агент"><div class="inspector-top"><span>Выбранный агент</span><button id="inspectorClose" class="icon-button" aria-label="Скрыть панель агента">×</button></div><div id="inspectorContent"></div><div class="inspector-note"><span>Состояние ≠ свежесть</span><p>Тишина в журнале не подтверждает, что агент работает или закончил ход.</p><div class="note-line"></div><p>Движение ядра — оформление. Импульс на связи — новое наблюдаемое событие.</p></div></aside>
+  </div>
+  <footer class="statusbar"><span><i class="dot green"></i>Только локальные события</span><span class="status-message" id="hostMessage">История Codex · только чтение</span><button id="motionToggle" aria-pressed="false">Движение включено</button><span class="version mono">AXON</span></footer>
+  <dialog id="settingsDialog" aria-labelledby="settingsTitle"><form method="dialog"><div class="dialog-heading"><div><div class="eyebrow">Локальное наблюдение</div><h2 id="settingsTitle">Подключение и вид</h2></div><button class="icon-button" aria-label="Закрыть настройки">×</button></div><p class="settings-intro">AXON читает историю Codex на этом компьютере. Сообщения, рассуждения и содержимое инструментов не передаются в интерфейс.</p><div class="setting-block"><label class="eyebrow" for="sourcePath">Папка Codex</label><output id="sourcePath" class="source-path">Ожидание источника</output><div class="button-row"><button type="button" id="chooseFolder" class="secondary-button">Выбрать папку</button><button type="button" id="rescan" class="secondary-button">Перечитать историю</button></div><p id="sourceDiagnostics" class="muted"></p></div><label class="setting-row"><div><strong>Служебные агенты</strong><p>Показывать внутренних проверяющих и их ветви</p></div><input id="showInternal" type="checkbox" class="setting-check"></label><label class="setting-row"><div><strong>Уменьшить движение</strong><p>Статичное ядро и связи без импульсов</p></div><input id="reducedMotion" type="checkbox" class="setting-check"></label><label class="setting-row"><div><strong>Следовать за новым чатом</strong><p>Переключаться на последний обновлённый корневой чат</p></div><input id="settingsFollow" type="checkbox" class="setting-check"></label><div class="dialog-footer"><span>Настройки сохраняются на этом компьютере</span><button class="primary-button">Готово</button></div></form></dialog>
+  <div id="announcement" class="sr-only" role="status" aria-live="polite"></div>
+</body>
+</html>
+

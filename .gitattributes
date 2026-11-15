@@ -1,0 +1,13 @@
+* text=auto
+*.cs text eol=lf
+*.csproj text eol=lf
+*.xaml text eol=lf
+*.js text eol=lf
+*.cjs text eol=lf
+*.css text eol=lf
+*.html text eol=lf
+*.md text eol=lf
+*.ps1 text eol=lf
+*.svg text eol=lf
+*.ttf binary
+*.ico binary
